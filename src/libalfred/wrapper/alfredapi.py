@@ -43,11 +43,11 @@ class AlfredAPI(RedisUserMixin):
     def move_line(
         self,
         goal_pos: Position,
-        speed: int,
-        acc: int,
-        is_relative: bool,
-        do_wait: bool,
-        timeout_ms: int,
+        speed: int = -1,
+        acc: int = -1,
+        is_relative: bool = False,
+        do_wait: bool = False,
+        timeout_ms: int = -1,
     ):
         """Move from start_pos to goal_pos in a straight line."""
 
