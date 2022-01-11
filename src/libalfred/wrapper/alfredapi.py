@@ -36,7 +36,7 @@ class AlfredAPI(RedisUserMixin):
             raise exceptions.NotConnectedException(
                 "This AlfredAPI instance is not connected to a redis server."
             )
-        self.rc.publish(self.pub_channel, repr(command))
+        self.rc.publish(self.pub_channel, {"command": repr(command)})
 
     def move_line(
         self,
