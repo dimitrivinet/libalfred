@@ -1,10 +1,11 @@
+import json
 import logging
 from typing import Optional
 
-from libalfred.wrapper.mixins.redis_user import RedisUserMixin
-from libalfred.utils.position import Position
 from libalfred.utils.command import Command
+from libalfred.utils.position import Position
 from libalfred.wrapper import exceptions
+from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,9 @@ class AlfredAPI(RedisUserMixin):
             raise exceptions.NotConnectedException(
                 "This AlfredAPI instance is not connected to a redis server."
             )
-        self.rc.publish(self.pub_channel, {"command": repr(command)})
+
+        message = {"command": repr(command)}
+        self.rc.publish(self.pub_channel, json.dumps(message))
 
     def move_line(
         self,
