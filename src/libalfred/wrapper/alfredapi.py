@@ -12,29 +12,27 @@ logger = logging.getLogger(__name__)
 class AlfredAPI(RedisUserMixin):
     """API for sending commands to the robot."""
 
-    host: str
-    port: int
     password: Optional[str]
     pub_channel: str
 
     def __init__(
         self,
-        host: str,
-        port: int,
-        password: str = None,
+        redis_host: str,
+        redis_port: int,
+        redis_password: str = None,
         pub_channel: str = "command-robot",
         auto_connect: bool = False,
     ):
-        self.host = host
-        self.port = port
-        self.password = password
+        self.redis_host = redis_host
+        self.redis_port = redis_port
+        self.redis_password = redis_password
         self.pub_channel = pub_channel
 
         if auto_connect:
-            self.connect_redis(self.host, self.port, self.password)
+            self.connect_redis()
 
     def publish_command(self, command: Command):
-        if not self.connected:
+        if not self._connected:
             raise exceptions.NotConnectedException(
                 "This AlfredAPI instance is not connected to a redis server."
             )
