@@ -1,6 +1,0 @@
-
-class NotConnectedException(Exception):
-    ...
-
-class GetPropTimeoutException(Exception):
-    ...

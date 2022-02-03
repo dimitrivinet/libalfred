@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from typing import Optional
@@ -35,7 +36,10 @@ class AlfredAPI(RedisUserMixin):
         self.connect_redis()
 
         self.pubsub.subscribe(
-            **{self.PROP_PUBSUB_CHANNEL: self.prop_message_handler}
+            **{
+                self.PROP_PUBSUB_CHANNEL: self.prop_message_handler,
+                self.FUNC_PUBSUB_CHANNEL: self.func_message_handler,
+            }
         )
         self.pubsub_thread = self.pubsub.run_in_thread(sleep_time=0.001)
 
@@ -53,6 +57,20 @@ class AlfredAPI(RedisUserMixin):
             prop_name, prop_val = value.split("=")
             self._arm.__setattr__(prop_name, prop_val)
 
+    def func_message_handler(self, message):
+        """Handle messages for executing functions."""
+
+        data = message["data"].decode("utf-8")
+
+        kw, value = data.split(":")
+
+        if kw == "exec":
+            return
+
+        if kw == "ret":
+            ret_val = value
+            self._arm.__setattr__("last_func_ret", ret_val)
+
     def _get_prop(self, prop_name: str, timeout=0.01):
         self._arm.__setattr__(prop_name, "dummy_val")
 
@@ -63,11 +81,31 @@ class AlfredAPI(RedisUserMixin):
         while self._arm.__getattribute__(prop_name) == "dummy_val":
             now = time.perf_counter()
             if now - begin > timeout:
-                raise exceptions.GetPropTimeoutException()
+                raise TimeoutError
 
             time.sleep(0.0005)
 
         return self._arm.__getattribute__(prop_name)
+
+    def _execute_func(self, func_name, *args, timeout=1_000, **kwargs):
+        func_dict = {"name": func_name, "args": args, "kwargs": kwargs}
+
+        self._arm.__setattr__("last_func_ret", "dummy_val")
+
+        self.rc.publish(
+            self.FUNC_PUBSUB_CHANNEL, f"exec:{json.dumps(func_dict)}"
+        )
+
+        # wait for value to be updated, timeout after timeout seconds
+        begin = time.perf_counter()
+        while self._arm.__getattribute__("last_func_ret") == "dummy_val":
+            now = time.perf_counter()
+            if now - begin > timeout:
+                raise TimeoutError
+
+            time.sleep(0.0005)
+
+        return self._arm.__getattribute__("last_func_ret")
 
     @property
     def count(self):
@@ -596,26 +634,26 @@ class AlfredAPI(RedisUserMixin):
     def ft_raw_force(self):
         return self._get_prop("ft_raw_force")
 
-    def connect(
-        self, port=None, baudrate=None, timeout=None, axis=None, **kwargs
-    ):
-        """
-        Connect to xArm
+    # def connect(
+    #     self, port=None, baudrate=None, timeout=None, axis=None, **kwargs
+    # ):
+    #     """
+    #     Connect to xArm
 
-        :param port: port name or the ip address, default is the value when initializing an instance
-        :param baudrate: baudrate, only available in serial way, default is the value when initializing an instance
-        :param timeout: timeout, only available in serial way, default is the value when initializing an instance
-        :param axis: number of axes, required only when using a serial port connection, default is 7
-        """
-        self._arm.connect(
-            port=port, baudrate=baudrate, timeout=timeout, axis=axis, **kwargs
-        )
+    #     :param port: port name or the ip address, default is the value when initializing an instance
+    #     :param baudrate: baudrate, only available in serial way, default is the value when initializing an instance
+    #     :param timeout: timeout, only available in serial way, default is the value when initializing an instance
+    #     :param axis: number of axes, required only when using a serial port connection, default is 7
+    #     """
+    #     self._arm.connect(
+    #         port=port, baudrate=baudrate, timeout=timeout, axis=axis, **kwargs
+    #     )
 
-    def disconnect(self):
-        """
-        Disconnect
-        """
-        self._arm.disconnect()
+    # def disconnect(self):
+    #     """
+    #     Disconnect
+    #     """
+    #     self._arm.disconnect()
 
     def send_cmd_sync(self, command=None):
         """
@@ -695,7 +733,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, [x, y, z, roll, pitch, yaw])), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_position(is_radian=is_radian)
+        return self._execute_func("get_position", is_radian=is_radian)
 
     def set_position(
         self,
@@ -751,7 +789,8 @@ class AlfredAPI(RedisUserMixin):
                 code < 0: the last_used_position/last_used_tcp_speed/last_used_tcp_acc will not be modified
                 code >= 0: the last_used_position/last_used_tcp_speed/last_used_tcp_acc will be modified
         """
-        return self._arm.set_position(
+        return self._execute_func(
+            "set_position",
             x=x,
             y=y,
             z=z,
@@ -811,7 +850,8 @@ class AlfredAPI(RedisUserMixin):
                 code < 0: the last_used_tcp_speed/last_used_tcp_acc will not be modified
                 code >= 0: the last_used_tcp_speed/last_used_tcp_acc will be modified
         """
-        return self._arm.set_tool_position(
+        return self._execute_func(
+            "set_tool_position",
             x=x,
             y=y,
             z=z,
