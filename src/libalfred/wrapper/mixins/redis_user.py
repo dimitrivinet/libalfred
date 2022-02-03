@@ -16,7 +16,9 @@ class RedisUserMixin:
 
     def connect_redis(self):
         self.rc = redis.Redis(
-            host=self.redis_host, port=self.redis_port, password=self.redis_password,
+            host=self.redis_host,
+            port=self.redis_port,
+            password=self.redis_password,
         )
         self.pubsub = self.rc.pubsub(ignore_subscribe_messages=True)
 
