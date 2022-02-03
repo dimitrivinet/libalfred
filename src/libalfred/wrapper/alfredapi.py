@@ -32,7 +32,7 @@ class AlfredAPI(RedisUserMixin):
         self.connect_redis()
 
         self.pubsub.subscribe(
-            {self.PROP_PUBSUB_CHANNEL: self.prop_message_handler}
+            **{self.PROP_PUBSUB_CHANNEL: self.prop_message_handler}
         )
         self.pubsub_thread = self.pubsub.run_in_thread(sleep_time=0.001)
 
@@ -81,7 +81,6 @@ class AlfredAPI(RedisUserMixin):
         :return: real time speed (mm/s)
         """
         return self._get_prop("realtime_tcp_speed")
-
 
     @property
     def realtime_joint_speeds(self):
