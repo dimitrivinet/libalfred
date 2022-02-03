@@ -43,10 +43,8 @@ class AlfredAPI(RedisUserMixin):
         """Handle messages for getting and setting properties."""
 
         data = message["data"].decode("utf-8")
-        print(data)
 
         kw, value = data.split(":")
-        print(kw, value)
 
         if kw == "get" or kw == "set":
             return
@@ -64,7 +62,6 @@ class AlfredAPI(RedisUserMixin):
         begin = time.perf_counter()
         while self._arm.__getattribute__(prop_name) == "dummy_val":
             now = time.perf_counter()
-            print(now - begin)
             if now - begin > timeout:
                 raise exceptions.GetPropTimeoutException()
 
