@@ -32,7 +32,7 @@ class AlfredAPI(RedisUserMixin):
         self.connect_redis()
 
         self.pubsub.subscribe(
-            {self.PROP_PUBSUB_CHANNEL, self.prop_message_handler}
+            {self.PROP_PUBSUB_CHANNEL: self.prop_message_handler}
         )
         self.pubsub_thread = self.pubsub.run_in_thread(sleep_time=0.001)
 
