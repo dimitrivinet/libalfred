@@ -3,9 +3,6 @@ import logging
 import time
 from typing import Optional
 
-from libalfred.utils.command import Command
-from libalfred.utils.position import Position
-from libalfred.wrapper import exceptions
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 from libalfred.wrapper.utils.fake_arm import FakeArm
 
@@ -882,8 +879,8 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, angle list if servo_id is None or 8 else angle)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_servo_angle(
-            servo_id=servo_id, is_radian=is_radian
+        return self._execute_func(
+            "get_servo_angle", servo_id=servo_id, is_radian=is_radian
         )
 
     def set_servo_angle(
@@ -941,7 +938,8 @@ class AlfredAPI(RedisUserMixin):
                 code < 0: the last_used_angles/last_used_joint_speed/last_used_joint_acc will not be modified
                 code >= 0: the last_used_angles/last_used_joint_speed/last_used_joint_acc will be modified
         """
-        return self._arm.set_servo_angle(
+        return self._execute_func(
+            "set_servo_angle",
             servo_id=servo_id,
             angle=angle,
             speed=speed,
@@ -979,7 +977,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_servo_angle_j(
+        return self._execute_func(
+            "set_servo_angle_j",
             angles,
             speed=speed,
             mvacc=mvacc,
@@ -1011,7 +1010,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_servo_cartesian(
+        return self._execute_func(
+            "set_servo_cartesian",
             mvpose,
             speed=speed,
             mvacc=mvacc,
@@ -1053,7 +1053,8 @@ class AlfredAPI(RedisUserMixin):
                 code < 0: the last_used_tcp_speed/last_used_tcp_acc will not be modified
                 code >= 0: the last_used_tcp_speed/last_used_tcp_acc will be modified
         """
-        return self._arm.move_circle(
+        return self._execute_func(
+            "move_circle",
             pose1,
             pose2,
             percent,
@@ -1094,7 +1095,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.move_gohome(
+        return self._execute_func(
+            "move_gohome",
             speed=speed,
             mvacc=mvacc,
             mvtime=mvtime,
@@ -1139,7 +1141,8 @@ class AlfredAPI(RedisUserMixin):
         :param mvtime: 0, reserved
         :param wait: whether to wait for the arm to complete, default is False
         """
-        return self._arm.move_arc_lines(
+        return self._execute_func(
+            "move_arc_lines",
             paths,
             is_radian=is_radian,
             times=times,
@@ -1164,7 +1167,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_servo_attach(servo_id=servo_id)
+        return self._execute_func("set_servo_attach", servo_id=servo_id)
 
     def set_servo_detach(self, servo_id=None):
         """
@@ -1178,7 +1181,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_servo_detach(servo_id=servo_id)
+        return self._execute_func("set_servo_detach", servo_id=servo_id)
 
     def get_version(self):
         """
@@ -1187,7 +1190,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, version)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_version()
+        return self._execute_func("get_version")
 
     def get_robot_sn(self):
         """
@@ -1196,7 +1199,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, sn)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_robot_sn()
+        return self._execute_func("get_robot_sn")
 
     def check_verification(self):
         """
@@ -1208,17 +1211,7 @@ class AlfredAPI(RedisUserMixin):
                 0: verified
                 other: not verified
         """
-        return self._arm.check_verification()
-
-    def shutdown_system(self, value=1):
-        """
-        Shutdown the xArm controller system
-
-        :param value: 1: remote shutdown
-        :return: code
-            code: See the API code documentation for details.
-        """
-        return self._arm.shutdown_system(value=value)
+        return self._execute_func("check_verification")
 
     def get_trajectories(self):
         """
@@ -1235,7 +1228,7 @@ class AlfredAPI(RedisUserMixin):
                 'duration': duration, # The duration of the trajectory (seconds)
             }]
         """
-        return self._arm.get_trajectories()
+        return self._execute_func("get_trajectories")
 
     def start_record_trajectory(self):
         """
@@ -1248,7 +1241,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.start_record_trajectory()
+        return self._execute_func("start_record_trajectory")
 
     def stop_record_trajectory(self, filename=None):
         """
@@ -1266,7 +1259,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.stop_record_trajectory(filename=filename)
+        return self._execute_func("stop_record_trajectory", filename=filename)
 
     def save_record_trajectory(self, filename, wait=True, timeout=2):
         """
@@ -1285,8 +1278,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.save_record_trajectory(
-            filename, wait=wait, timeout=timeout
+        return self._execute_func(
+            "save_record_trajectory", filename, wait=wait, timeout=timeout
         )
 
     def load_trajectory(self, filename, wait=True, timeout=10):
@@ -1302,7 +1295,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.load_trajectory(filename, wait=wait, timeout=timeout)
+        return self._execute_func(
+            "load_trajectory", filename, wait=wait, timeout=timeout
+        )
 
     def playback_trajectory(
         self, times=1, filename=None, wait=True, double_speed=1
@@ -1322,7 +1317,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.playback_trajectory(
+        return self._execute_func(
+            "playback_trajectory",
             times=times,
             filename=filename,
             wait=wait,
@@ -1344,7 +1340,7 @@ class AlfredAPI(RedisUserMixin):
                 5: save success
                 6: save failed
         """
-        return self._arm.get_trajectory_rw_status()
+        return self._execute_func("get_trajectory_rw_status")
 
     def get_reduced_mode(self):
         """
@@ -1357,7 +1353,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             mode: 0 or 1, 1 means that the reduced mode is turned on. 0 means that the reduced mode is not turned on
         """
-        return self._arm.get_reduced_mode()
+        return self._execute_func("get_reduced_mode")
 
     def get_reduced_states(self, is_radian=None):
         """
@@ -1388,7 +1384,7 @@ class AlfredAPI(RedisUserMixin):
                         reduced_max_joint_speed,
                     ]`
         """
-        return self._arm.get_reduced_states(is_radian=is_radian)
+        return self._execute_func("get_reduced_states", is_radian=is_radian)
 
     def set_reduced_mode(self, on):
         """
@@ -1402,7 +1398,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_reduced_mode(on)
+        return self._execute_func("set_reduced_mode", on)
 
     def set_reduced_max_tcp_speed(self, speed):
         """
@@ -1416,7 +1412,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_reduced_max_tcp_speed(speed)
+        return self._execute_func("set_reduced_max_tcp_speed", speed)
 
     def set_reduced_max_joint_speed(self, speed, is_radian=None):
         """
@@ -1431,8 +1427,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_reduced_max_joint_speed(
-            speed, is_radian=is_radian
+        return self._execute_func(
+            "set_reduced_max_joint_speed", speed, is_radian=is_radian
         )
 
     def set_reduced_tcp_boundary(self, boundary):
@@ -1447,7 +1443,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_reduced_tcp_boundary(boundary)
+        return self._execute_func("set_reduced_tcp_boundary", boundary)
 
     def set_reduced_joint_range(self, joint_range, is_radian=None):
         """
@@ -1461,8 +1457,8 @@ class AlfredAPI(RedisUserMixin):
         :param is_radian: the param joint_range are in radians or not, default is self.default_is_radian
         :return:
         """
-        return self._arm.set_reduced_joint_range(
-            joint_range, is_radian=is_radian
+        return self._execute_func(
+            "set_reduced_joint_range", joint_range, is_radian=is_radian
         )
 
     def set_fence_mode(self, on):
@@ -1476,7 +1472,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_fense_mode(on)
+        return self._execute_func("set_fense_mode", on)
 
     def set_collision_rebound(self, on):
         """
@@ -1489,7 +1485,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_collision_rebound(on)
+        return self._execute_func("set_collision_rebound", on)
 
     def set_world_offset(self, offset, is_radian=None):
         """
@@ -1503,14 +1499,16 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_world_offset(offset, is_radian=is_radian)
+        return self._execute_func(
+            "set_world_offset", offset, is_radian=is_radian
+        )
 
     def get_is_moving(self):
         """
         Check xArm is moving or not
         :return: True/False
         """
-        return self._arm.get_is_moving()
+        return self._execute_func("get_is_moving")
 
     def get_state(self):
         """
@@ -1524,7 +1522,7 @@ class AlfredAPI(RedisUserMixin):
                 3: suspended
                 4: stopping
         """
-        return self._arm.get_state()
+        return self._execute_func("get_state")
 
     def set_state(self, state=0):
         """
@@ -1537,7 +1535,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_state(state=state)
+        return self._execute_func("set_state", state=state)
 
     def set_mode(self, mode=0):
         """
@@ -1556,7 +1554,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_mode(mode=mode)
+        return self._execute_func("set_mode", mode=mode)
 
     def get_cmdnum(self):
         """
@@ -1564,7 +1562,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, cmd_num)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_cmdnum()
+        return self._execute_func("get_cmdnum")
 
     def get_err_warn_code(self, show=False, lang="en"):
         """
@@ -1577,7 +1575,7 @@ class AlfredAPI(RedisUserMixin):
             error_code: See Chapter 7 of the xArm User Manual for details.
             warn_code: See Chapter 7 of the xArm User Manual for details.
         """
-        return self._arm.get_err_warn_code(show=show, lang=lang)
+        return self._execute_func("get_err_warn_code", show=show, lang=lang)
 
     def clean_error(self):
         """
@@ -1586,7 +1584,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.clean_error()
+        return self._execute_func("clean_error")
 
     def clean_warn(self):
         """
@@ -1595,7 +1593,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.clean_warn()
+        return self._execute_func("clean_warn")
 
     def motion_enable(self, enable=True, servo_id=None):
         """
@@ -1606,7 +1604,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.motion_enable(servo_id=servo_id, enable=enable)
+        return self._execute_func(
+            "motion_enable", servo_id=servo_id, enable=enable
+        )
 
     def reset(
         self,
@@ -1632,7 +1632,8 @@ class AlfredAPI(RedisUserMixin):
         :param wait: whether to wait for the arm to complete, default is False
         :param timeout: maximum waiting time(unit: second), default is None(no timeout), only valid if wait is True
         """
-        return self._arm.reset(
+        return self._execute_func(
+            "reset",
             speed=speed,
             mvacc=mvacc,
             mvtime=mvtime,
@@ -1650,7 +1651,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_pause_time(sltime, wait=wait)
+        return self._execute_func("set_pause_time", sltime, wait=wait)
 
     def set_tcp_offset(self, offset, is_radian=None, **kwargs):
         """
@@ -1667,7 +1668,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tcp_offset(offset, is_radian=is_radian, **kwargs)
+        return self._execute_func(
+            "set_tcp_offset", offset, is_radian=is_radian, **kwargs
+        )
 
     def set_tcp_jerk(self, jerk):
         """
@@ -1682,7 +1685,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tcp_jerk(jerk)
+        return self._execute_func("set_tcp_jerk", jerk)
 
     def set_tcp_maxacc(self, acc):
         """
@@ -1697,7 +1700,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tcp_maxacc(acc)
+        return self._execute_func("set_tcp_maxacc", acc)
 
     def set_joint_jerk(self, jerk, is_radian=None):
         """
@@ -1713,7 +1716,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_joint_jerk(jerk, is_radian=is_radian)
+        return self._execute_func("set_joint_jerk", jerk, is_radian=is_radian)
 
     def set_joint_maxacc(self, acc, is_radian=None):
         """
@@ -1730,7 +1733,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_joint_maxacc(acc, is_radian=is_radian)
+        return self._execute_func("set_joint_maxacc", acc, is_radian=is_radian)
 
     def set_tcp_load(self, weight, center_of_gravity):
         """
@@ -1747,7 +1750,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tcp_load(weight, center_of_gravity)
+        return self._execute_func("set_tcp_load", weight, center_of_gravity)
 
     def set_collision_sensitivity(self, value):
         """
@@ -1763,7 +1766,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_collision_sensitivity(value)
+        return self._execute_func("set_collision_sensitivity", value)
 
     def set_teach_sensitivity(self, value):
         """
@@ -1779,7 +1782,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_teach_sensitivity(value)
+        return self._execute_func("set_teach_sensitivity", value)
 
     def set_gravity_direction(self, direction):
         """
@@ -1795,7 +1798,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_gravity_direction(direction=direction)
+        return self._execute_func("set_gravity_direction", direction=direction)
 
     def set_mount_direction(self, base_tilt_deg, rotation_deg, is_radian=None):
         """
@@ -1813,8 +1816,11 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_mount_direction(
-            base_tilt_deg, rotation_deg, is_radian=is_radian
+        return self._execute_func(
+            "set_mount_direction",
+            base_tilt_deg,
+            rotation_deg,
+            is_radian=is_radian,
         )
 
     def clean_conf(self):
@@ -1826,7 +1832,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.clean_conf()
+        return self._execute_func("clean_conf")
 
     def save_conf(self):
         """
@@ -1838,7 +1844,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.save_conf()
+        return self._execute_func("save_conf")
 
     def get_inverse_kinematics(
         self, pose, input_is_radian=None, return_is_radian=None
@@ -1855,7 +1861,8 @@ class AlfredAPI(RedisUserMixin):
             angles: [angle-1(rad or °), angle-2, ..., angle-(Number of axes)] or []
                 Note: the returned angle value is radians if return_is_radian is True, else °
         """
-        return self._arm.get_inverse_kinematics(
+        return self._execute_func(
+            "get_inverse_kinematics",
             pose,
             input_is_radian=input_is_radian,
             return_is_radian=return_is_radian,
@@ -1875,7 +1882,8 @@ class AlfredAPI(RedisUserMixin):
             pose: [x(mm), y(mm), z(mm), roll(rad or °), pitch(rad or °), yaw(rad or °)] or []
                 Note: the roll/pitch/yaw value is radians if return_is_radian is True, else °
         """
-        return self._arm.get_forward_kinematics(
+        return self._execute_func(
+            "get_forward_kinematics",
             angles,
             input_is_radian=input_is_radian,
             return_is_radian=return_is_radian,
@@ -1891,7 +1899,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             limit: True/False/None, limit or not, or failed
         """
-        return self._arm.is_tcp_limit(pose, is_radian=is_radian)
+        return self._execute_func("is_tcp_limit", pose, is_radian=is_radian)
 
     def is_joint_limit(self, joint, is_radian=None):
         """
@@ -1903,7 +1911,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             limit: True/False/None, limit or not, or failed
         """
-        return self._arm.is_joint_limit(joint, is_radian=is_radian)
+        return self._execute_func("is_joint_limit", joint, is_radian=is_radian)
 
     def emergency_stop(self):
         """
@@ -1911,7 +1919,7 @@ class AlfredAPI(RedisUserMixin):
         Note:
             1. This interface does not automatically clear the error. If there is an error, you need to handle it according to the error code.
         """
-        return self._arm.emergency_stop()
+        return self._execute_func("emergency_stop")
 
     def set_gripper_enable(self, enable, **kwargs):
         """
@@ -1922,7 +1930,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the Gripper code documentation for details.
         """
-        return self._arm.set_gripper_enable(enable, **kwargs)
+        return self._execute_func("set_gripper_enable", enable, **kwargs)
 
     def set_gripper_mode(self, mode, **kwargs):
         """
@@ -1933,7 +1941,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the Gripper code documentation for details.
         """
-        return self._arm.set_gripper_mode(mode, **kwargs)
+        return self._execute_func("set_gripper_mode", mode, **kwargs)
 
     def get_gripper_position(self, **kwargs):
         """
@@ -1942,7 +1950,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, pos)), only when code is 0, the returned result is correct.
             code: See the Gripper code documentation for details.
         """
-        return self._arm.get_gripper_position(**kwargs)
+        return self._execute_func("get_gripper_position", **kwargs)
 
     def set_gripper_position(
         self,
@@ -1964,7 +1972,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the Gripper code documentation for details.
         """
-        return self._arm.set_gripper_position(
+        return self._execute_func(
+            "set_gripper_position",
             pos,
             wait=wait,
             speed=speed,
@@ -1981,7 +1990,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the Gripper code documentation for details.
         """
-        return self._arm.set_gripper_speed(speed, **kwargs)
+        return self._execute_func("set_gripper_speed", speed, **kwargs)
 
     def get_gripper_err_code(self, **kwargs):
         """
@@ -1991,7 +2000,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             err_code: See the Gripper code documentation for details.
         """
-        return self._arm.get_gripper_err_code(**kwargs)
+        return self._execute_func("get_gripper_err_code", **kwargs)
 
     def clean_gripper_error(self, **kwargs):
         """
@@ -2000,7 +2009,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the Gripper code documentation for details.
         """
-        return self._arm.clean_gripper_error(**kwargs)
+        return self._execute_func("clean_gripper_error", **kwargs)
 
     def get_tgpio_digital(self, ionum=None):
         """
@@ -2010,7 +2019,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, value or value list)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_tgpio_digital(ionum)
+        return self._execute_func("get_tgpio_digital", ionum)
 
     def set_tgpio_digital(self, ionum, value, delay_sec=None):
         """
@@ -2022,8 +2031,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tgpio_digital(
-            ionum=ionum, value=value, delay_sec=delay_sec
+        return self._execute_func(
+            "set_tgpio_digital", ionum=ionum, value=value, delay_sec=delay_sec
         )
 
     def get_tgpio_analog(self, ionum=None):
@@ -2033,7 +2042,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, value or value list)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_tgpio_analog(ionum)
+        return self._execute_func("get_tgpio_analog", ionum)
 
     def get_vacuum_gripper(self):
         """
@@ -2045,7 +2054,7 @@ class AlfredAPI(RedisUserMixin):
                 0: suction cup is off
                 1: suction cup is on
         """
-        return self._arm.get_suction_cup()
+        return self._execute_func("get_suction_cup")
 
     def set_vacuum_gripper(self, on, wait=False, timeout=3, delay_sec=None):
         """
@@ -2060,8 +2069,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_suction_cup(
-            on, wait=wait, timeout=timeout, delay_sec=delay_sec
+        return self._execute_func(
+            "set_suction_cup",
+            on,
+            wait=wait,
+            timeout=timeout,
+            delay_sec=delay_sec,
         )
 
     def get_cgpio_digital(self, ionum=None):
@@ -2072,7 +2085,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, value or value list)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_cgpio_digital(ionum=ionum)
+        return self._execute_func("get_cgpio_digital", ionum=ionum)
 
     def get_cgpio_analog(self, ionum=None):
         """
@@ -2081,7 +2094,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, value or value list)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_cgpio_analog(ionum=ionum)
+        return self._execute_func("get_cgpio_analog", ionum=ionum)
 
     def set_cgpio_digital(self, ionum, value, delay_sec=None):
         """
@@ -2093,8 +2106,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_digital(
-            ionum=ionum, value=value, delay_sec=delay_sec
+        return self._execute_func(
+            "set_cgpio_digital", ionum=ionum, value=value, delay_sec=delay_sec
         )
 
     def set_cgpio_analog(self, ionum, value):
@@ -2106,7 +2119,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_analog(ionum=ionum, value=value)
+        return self._execute_func("set_cgpio_analog", ionum=ionum, value=value)
 
     def set_cgpio_digital_input_function(self, ionum, fun):
         """
@@ -2126,7 +2139,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_digital_input_function(ionum=ionum, fun=fun)
+        return self._execute_func(
+            "set_cgpio_digital_input_function", ionum=ionum, fun=fun
+        )
 
     def set_cgpio_digital_output_function(self, ionum, fun):
         """
@@ -2147,8 +2162,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_digital_output_function(
-            ionum=ionum, fun=fun
+        return self._execute_func(
+            "set_cgpio_digital_output_function", ionum=ionum, fun=fun
         )
 
     def get_cgpio_state(self):
@@ -2179,7 +2194,7 @@ class AlfredAPI(RedisUserMixin):
                 states[10]: digital input functional info, [digital-0-input-functional-mode, ... digital-7-input-functional-mode]
                 states[11]: digital output functional info, [digital-0-output-functional-mode, ... digital-7-output-functional-mode]
         """
-        return self._arm.get_cgpio_state()
+        return self._execute_func("get_cgpio_state")
 
     def register_report_callback(
         self,
@@ -2218,7 +2233,8 @@ class AlfredAPI(RedisUserMixin):
         :param report_cmd_num: report cmdnum or not, default is True
         :return: True/False
         """
-        return self._arm.register_report_callback(
+        return self._execute_func(
+            "register_report_callback",
             callback=callback,
             report_cartesian=report_cartesian,
             report_joints=report_joints,
@@ -2246,7 +2262,8 @@ class AlfredAPI(RedisUserMixin):
         :param report_joints: report or not, True/False, default is True
         :return: True/False
         """
-        return self._arm.register_report_location_callback(
+        return self._execute_func(
+            "register_report_location_callback",
             callback=callback,
             report_cartesian=report_cartesian,
             report_joints=report_joints,
@@ -2264,7 +2281,9 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_connect_changed_callback(callback=callback)
+        return self._execute_func(
+            "register_connect_changed_callback", callback=callback
+        )
 
     def register_state_changed_callback(self, callback=None):
         """
@@ -2277,7 +2296,9 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_state_changed_callback(callback=callback)
+        return self._execute_func(
+            "register_state_changed_callback", callback=callback
+        )
 
     def register_mode_changed_callback(self, callback=None):
         """
@@ -2290,7 +2311,9 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_mode_changed_callback(callback=callback)
+        return self._execute_func(
+            "register_mode_changed_callback", callback=callback
+        )
 
     def register_mtable_mtbrake_changed_callback(self, callback=None):
         """
@@ -2304,8 +2327,8 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_mtable_mtbrake_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "register_mtable_mtbrake_changed_callback", callback=callback
         )
 
     def register_error_warn_changed_callback(self, callback=None):
@@ -2320,8 +2343,8 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_error_warn_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "register_error_warn_changed_callback", callback=callback
         )
 
     def register_cmdnum_changed_callback(self, callback=None):
@@ -2335,7 +2358,9 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_cmdnum_changed_callback(callback=callback)
+        return self._execute_func(
+            "register_cmdnum_changed_callback", callback=callback
+        )
 
     def register_temperature_changed_callback(self, callback=None):
         """
@@ -2348,8 +2373,8 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_temperature_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "register_temperature_changed_callback", callback=callback
         )
 
     def register_count_changed_callback(self, callback=None):
@@ -2363,7 +2388,9 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_count_changed_callback(callback=callback)
+        return self._execute_func(
+            "register_count_changed_callback", callback=callback
+        )
 
     def register_iden_progress_changed_callback(self, callback=None):
         """
@@ -2376,8 +2403,8 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._arm.register_iden_progress_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "register_iden_progress_changed_callback", callback=callback
         )
 
     def release_report_callback(self, callback=None):
@@ -2387,7 +2414,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_report_callback(callback)
+        return self._execute_func("release_report_callback", callback)
 
     def release_report_location_callback(self, callback=None):
         """
@@ -2396,7 +2423,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_report_location_callback(callback)
+        return self._execute_func("release_report_location_callback", callback)
 
     def release_connect_changed_callback(self, callback=None):
         """
@@ -2405,7 +2432,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_connect_changed_callback(callback)
+        return self._execute_func("release_connect_changed_callback", callback)
 
     def release_state_changed_callback(self, callback=None):
         """
@@ -2414,7 +2441,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_state_changed_callback(callback)
+        return self._execute_func("release_state_changed_callback", callback)
 
     def release_mode_changed_callback(self, callback=None):
         """
@@ -2423,7 +2450,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_mode_changed_callback(callback)
+        return self._execute_func("release_mode_changed_callback", callback)
 
     def release_mtable_mtbrake_changed_callback(self, callback=None):
         """
@@ -2432,7 +2459,9 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_mtable_mtbrake_changed_callback(callback)
+        return self._execute_func(
+            "release_mtable_mtbrake_changed_callback", callback
+        )
 
     def release_error_warn_changed_callback(self, callback=None):
         """
@@ -2441,7 +2470,9 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_error_warn_changed_callback(callback)
+        return self._execute_func(
+            "release_error_warn_changed_callback", callback
+        )
 
     def release_cmdnum_changed_callback(self, callback=None):
         """
@@ -2450,7 +2481,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_cmdnum_changed_callback(callback)
+        return self._execute_func("release_cmdnum_changed_callback", callback)
 
     def release_temperature_changed_callback(self, callback=None):
         """
@@ -2459,8 +2490,8 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_temperature_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "release_temperature_changed_callback", callback=callback
         )
 
     def release_count_changed_callback(self, callback=None):
@@ -2470,7 +2501,9 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_count_changed_callback(callback=callback)
+        return self._execute_func(
+            "release_count_changed_callback", callback=callback
+        )
 
     def release_iden_progress_changed_callback(self, callback=None):
         """
@@ -2479,8 +2512,8 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._arm.release_iden_progress_changed_callback(
-            callback=callback
+        return self._execute_func(
+            "release_iden_progress_changed_callback", callback=callback
         )
 
     def get_servo_debug_msg(self, show=False, lang="en"):
@@ -2492,21 +2525,21 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, servo_info_list)), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_servo_debug_msg(show=show, lang=lang)
+        return self._execute_func("get_servo_debug_msg", show=show, lang=lang)
 
     def run_blockly_app(self, path, **kwargs):
         """
         Run the app generated by xArmStudio software
         :param path: app path
         """
-        return self._arm.run_blockly_app(path, **kwargs)
+        return self._execute_func("run_blockly_app", path, **kwargs)
 
     def run_gcode_file(self, path, **kwargs):
         """
         Run the gcode file
         :param path: gcode file path
         """
-        return self._arm.run_gcode_file(path, **kwargs)
+        return self._execute_func("run_gcode_file", path, **kwargs)
 
     def get_gripper_version(self):
         """
@@ -2515,7 +2548,7 @@ class AlfredAPI(RedisUserMixin):
         :return: (code, version)
             code: See the API code documentation for details.
         """
-        return self._arm.get_gripper_version()
+        return self._execute_func("get_gripper_version")
 
     def get_servo_version(self, servo_id=1):
         """
@@ -2525,7 +2558,7 @@ class AlfredAPI(RedisUserMixin):
         :return: (code, version)
             code: See the API code documentation for details.
         """
-        return self._arm.get_servo_version(servo_id=servo_id)
+        return self._execute_func("get_servo_version", servo_id=servo_id)
 
     def get_tgpio_version(self):
         """
@@ -2534,7 +2567,7 @@ class AlfredAPI(RedisUserMixin):
         :return: (code, version)
             code: See the API code documentation for details.
         """
-        return self._arm.get_tgpio_version()
+        return self._execute_func("get_tgpio_version")
 
     def get_harmonic_type(self, servo_id=1):
         """
@@ -2543,7 +2576,7 @@ class AlfredAPI(RedisUserMixin):
         :return: (code, type)
             code: See the API code documentation for details.
         """
-        return self._arm.get_harmonic_type(servo_id=servo_id)
+        return self._execute_func("get_harmonic_type", servo_id=servo_id)
 
     def get_hd_types(self):
         """
@@ -2552,7 +2585,7 @@ class AlfredAPI(RedisUserMixin):
         :return: (code, types)
             code: See the API code documentation for details.
         """
-        return self._arm.get_hd_types()
+        return self._execute_func("get_hd_types")
 
     def set_counter_reset(self):
         """
@@ -2561,7 +2594,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_counter_reset()
+        return self._execute_func("set_counter_reset")
 
     def set_counter_increase(self, val=1):
         """
@@ -2571,7 +2604,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_counter_increase(val)
+        return self._execute_func("set_counter_increase", val)
 
     def set_tgpio_digital_with_xyz(
         self, ionum, value, xyz, fault_tolerance_radius
@@ -2586,8 +2619,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tgpio_digital_with_xyz(
-            ionum, value, xyz, fault_tolerance_radius
+        return self._execute_func(
+            "set_tgpio_digital_with_xyz",
+            ionum,
+            value,
+            xyz,
+            fault_tolerance_radius,
         )
 
     def set_cgpio_digital_with_xyz(
@@ -2603,8 +2640,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_digital_with_xyz(
-            ionum, value, xyz, fault_tolerance_radius
+        return self._execute_func(
+            "set_cgpio_digital_with_xyz",
+            ionum,
+            value,
+            xyz,
+            fault_tolerance_radius,
         )
 
     def set_cgpio_analog_with_xyz(
@@ -2620,8 +2661,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_cgpio_analog_with_xyz(
-            ionum, value, xyz, fault_tolerance_radius
+        return self._execute_func(
+            "set_cgpio_analog_with_xyz",
+            ionum,
+            value,
+            xyz,
+            fault_tolerance_radius,
         )
 
     def config_tgpio_reset_when_stop(self, on_off):
@@ -2632,7 +2677,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.config_io_reset_when_stop(1, on_off)
+        return self._execute_func("config_io_reset_when_stop", 1, on_off)
 
     def config_cgpio_reset_when_stop(self, on_off):
         """
@@ -2642,7 +2687,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.config_io_reset_when_stop(0, on_off)
+        return self._execute_func("config_io_reset_when_stop", 0, on_off)
 
     def set_position_aa(
         self,
@@ -2672,7 +2717,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_position_aa(
+        return self._execute_func(
+            "set_position_aa",
             axis_angle_pose,
             speed=speed,
             mvacc=mvacc,
@@ -2710,7 +2756,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
         """
 
-        return self._arm.set_servo_cartesian_aa(
+        return self._execute_func(
+            "set_servo_cartesian_aa",
             axis_angle_pose,
             speed=speed,
             mvacc=mvacc,
@@ -2735,7 +2782,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             pose: [x(mm), y(mm), z(mm), roll/rx(rad or °), pitch/ry(rad or °), yaw/rz(rad or °)]
         """
-        return self._arm.get_pose_offset(
+        return self._execute_func(
+            "get_pose_offset",
             pose1,
             pose2,
             orient_type_in=orient_type_in,
@@ -2751,7 +2799,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, [x, y, z, rx, ry, rz])), only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_position_aa(is_radian=is_radian)
+        return self._execute_func("get_position_aa", is_radian=is_radian)
 
     def get_joints_torque(self):
         """
@@ -2761,7 +2809,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             joints_torque: joints torque
         """
-        return self._arm.get_joints_torque()
+        return self._execute_func("get_joints_torque")
 
     def set_joints_torque(self, joints_torque):
         """
@@ -2772,7 +2820,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_joints_torque(joints_torque)
+        return self._execute_func("set_joints_torque", joints_torque)
 
     def get_safe_level(self):
         """
@@ -2782,7 +2830,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             safe_level: safe level
         """
-        return self._arm.get_safe_level()
+        return self._execute_func("get_safe_level")
 
     def set_safe_level(self, level=4):
         """
@@ -2792,7 +2840,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_safe_level(level=level)
+        return self._execute_func("set_safe_level", level=level)
 
     def set_timeout(self, timeout):
         """
@@ -2800,7 +2848,7 @@ class AlfredAPI(RedisUserMixin):
 
         :param timeout: seconds
         """
-        return self._arm.set_timeout(timeout)
+        return self._execute_func("set_timeout", timeout)
 
     def robotiq_reset(self):
         """
@@ -2810,7 +2858,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_reset()
+        return self._execute_func("robotiq_reset")
 
     def robotiq_set_activate(self, wait=True, timeout=3):
         """
@@ -2823,7 +2871,9 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_set_activate(wait=wait, timeout=timeout)
+        return self._execute_func(
+            "robotiq_set_activate", wait=wait, timeout=timeout
+        )
 
     def robotiq_set_position(
         self, pos, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs
@@ -2841,8 +2891,14 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_set_position(
-            pos, speed=speed, force=force, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "robotiq_set_position",
+            pos,
+            speed=speed,
+            force=force,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def robotiq_open(
@@ -2860,8 +2916,13 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_open(
-            speed=speed, force=force, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "robotiq_open",
+            speed=speed,
+            force=force,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def robotiq_close(
@@ -2879,8 +2940,13 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_close(
-            speed=speed, force=force, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "robotiq_close",
+            speed=speed,
+            force=force,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def robotiq_get_status(self, number_of_registers=3):
@@ -2900,8 +2966,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._arm.robotiq_get_status(
-            number_of_registers=number_of_registers
+        return self._execute_func(
+            "robotiq_get_status", number_of_registers=number_of_registers
         )
 
     @property
@@ -2940,8 +3006,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_bio_gripper_enable(
-            enable, wait=wait, timeout=timeout
+        return self._execute_func(
+            "set_bio_gripper_enable", enable, wait=wait, timeout=timeout
         )
 
     def set_bio_gripper_speed(self, speed):
@@ -2953,7 +3019,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_bio_gripper_speed(speed)
+        return self._execute_func("set_bio_gripper_speed", speed)
 
     def open_bio_gripper(self, speed=0, wait=True, timeout=5, **kwargs):
         """
@@ -2966,8 +3032,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.open_bio_gripper(
-            speed=speed, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "open_bio_gripper",
+            speed=speed,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def close_bio_gripper(self, speed=0, wait=True, timeout=5, **kwargs):
@@ -2981,8 +3051,12 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.close_bio_gripper(
-            speed=speed, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "close_bio_gripper",
+            speed=speed,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def get_bio_gripper_status(self):
@@ -3000,7 +3074,7 @@ class AlfredAPI(RedisUserMixin):
                 (status >> 2) & 0x03 == 1: enabling
                 (status >> 2) & 0x03 == 2: enabled
         """
-        return self._arm.get_bio_gripper_status()
+        return self._execute_func("get_bio_gripper_status")
 
     def get_bio_gripper_error(self):
         """
@@ -3010,7 +3084,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             error_code: See Chapter 7 of the xArm User Manual for details.
         """
-        return self._arm.get_bio_gripper_error()
+        return self._execute_func("get_bio_gripper_error")
 
     def clean_bio_gripper_error(self):
         """
@@ -3019,7 +3093,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.clean_bio_gripper_error()
+        return self._execute_func("clean_bio_gripper_error")
 
     def set_tgpio_modbus_timeout(self, timeout):
         """
@@ -3030,7 +3104,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tgpio_modbus_timeout(timeout)
+        return self._execute_func("set_tgpio_modbus_timeout", timeout)
 
     def set_tgpio_modbus_baudrate(self, baud):
         """
@@ -3041,7 +3115,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_tgpio_modbus_baudrate(baud)
+        return self._execute_func("set_tgpio_modbus_baudrate", baud)
 
     def get_tgpio_modbus_baudrate(self):
         """
@@ -3051,7 +3125,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             baudrate: the modbus baudrate of the tool gpio
         """
-        return self._arm.get_tgpio_modbus_baudrate()
+        return self._execute_func("get_tgpio_modbus_baudrate")
 
     def getset_tgpio_modbus_data(self, datas, min_res_len=0):
         """
@@ -3064,8 +3138,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             modbus_response: modbus response data
         """
-        return self._arm.getset_tgpio_modbus_data(
-            datas, min_res_len=min_res_len
+        return self._execute_func(
+            "getset_tgpio_modbus_data", datas, min_res_len=min_res_len
         )
 
     def set_report_tau_or_i(self, tau_or_i=0):
@@ -3079,7 +3153,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_report_tau_or_i(tau_or_i=tau_or_i)
+        return self._execute_func("set_report_tau_or_i", tau_or_i=tau_or_i)
 
     def get_report_tau_or_i(self):
         """
@@ -3091,7 +3165,7 @@ class AlfredAPI(RedisUserMixin):
                 0: torque
                 1: electric current
         """
-        return self._arm.get_report_tau_or_i()
+        return self._execute_func("get_report_tau_or_i")
 
     def set_self_collision_detection(self, on_off):
         """
@@ -3102,7 +3176,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_self_collision_detection(on_off)
+        return self._execute_func("set_self_collision_detection", on_off)
 
     def set_collision_tool_model(self, tool_type, *args, **kwargs):
         """
@@ -3129,7 +3203,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_collision_tool_model(tool_type, *args, **kwargs)
+        return self._execute_func(
+            "set_collision_tool_model", tool_type, *args, **kwargs
+        )
 
     def set_simulation_robot(self, on_off):
         """
@@ -3139,7 +3215,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_simulation_robot(on_off)
+        return self._execute_func("set_simulation_robot", on_off)
 
     def vc_set_joint_velocity(
         self, speeds, is_radian=None, is_sync=True, duration=-1, **kwargs
@@ -3160,7 +3236,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.vc_set_joint_velocity(
+        return self._execute_func(
+            "vc_set_joint_velocity",
             speeds,
             is_radian=is_radian,
             is_sync=is_sync,
@@ -3192,7 +3269,8 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.vc_set_cartesian_velocity(
+        return self._execute_func(
+            "vc_set_cartesian_velocity",
             speeds,
             is_radian=is_radian,
             is_tool_coord=is_tool_coord,
@@ -3212,8 +3290,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             xyz_offset: calculated xyz(mm) TCP offset, [x, y, z]
         """
-        return self._arm.calibrate_tcp_coordinate_offset(
-            four_points, is_radian=is_radian
+        return self._execute_func(
+            "calibrate_tcp_coordinate_offset", four_points, is_radian=is_radian
         )
 
     def calibrate_tcp_orientation_offset(
@@ -3232,7 +3310,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             rpy_offset: calculated rpy TCP offset, [roll, pitch, yaw]
         """
-        return self._arm.calibrate_tcp_orientation_offset(
+        return self._execute_func(
+            "calibrate_tcp_orientation_offset",
             rpy_be,
             rpy_bt,
             input_is_radian=input_is_radian,
@@ -3265,7 +3344,8 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             rpy_offset: calculated rpy user offset, [roll, pitch, yaw]
         """
-        return self._arm.calibrate_user_orientation_offset(
+        return self._execute_func(
+            "calibrate_user_orientation_offset",
             three_points,
             mode=mode,
             trust_ind=trust_ind,
@@ -3288,8 +3368,11 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             xyz_offset: calculated xyz(mm) user offset, [x, y, z]
         """
-        return self._arm.calibrate_user_coordinate_offset(
-            rpy_ub, pos_b_uorg, is_radian=is_radian
+        return self._execute_func(
+            "calibrate_user_coordinate_offset",
+            rpy_ub,
+            pos_b_uorg,
+            is_radian=is_radian,
         )
 
     def get_base_board_version(self, board_id=10):
@@ -3300,7 +3383,7 @@ class AlfredAPI(RedisUserMixin):
         :return: : (code, version)
             code: See the API code documentation for details.
         """
-        return self._arm.get_base_board_version(board_id)
+        return self._execute_func("get_base_board_version", board_id)
 
     def set_impedance(self, coord, c_axis, M, K, B):
         """
@@ -3316,7 +3399,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_impedance(coord, c_axis, M, K, B)
+        return self._execute_func("set_impedance", coord, c_axis, M, K, B)
 
     def set_impedance_mbk(self, M, K, B):
         """
@@ -3330,7 +3413,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_impedance_mbk(M, K, B)
+        return self._execute_func("set_impedance_mbk", M, K, B)
 
     def set_impedance_config(self, coord, c_axis):
         """
@@ -3343,7 +3426,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_impedance_config(coord, c_axis)
+        return self._execute_func("set_impedance_config", coord, c_axis)
 
     def config_force_control(self, coord, c_axis, f_ref, limits):
         """
@@ -3359,7 +3442,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.config_force_control(coord, c_axis, f_ref, limits)
+        return self._execute_func(
+            "config_force_control", coord, c_axis, f_ref, limits
+        )
 
     def set_force_control_pid(self, kp, ki, kd, xe_limit):
         """
@@ -3374,7 +3459,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_force_control_pid(kp, ki, kd, xe_limit)
+        return self._execute_func(
+            "set_force_control_pid", kp, ki, kd, xe_limit
+        )
 
     def ft_sensor_set_zero(self):
         """
@@ -3385,7 +3472,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.ft_sensor_set_zero()
+        return self._execute_func("ft_sensor_set_zero")
 
     def ft_sensor_iden_load(self):
         """
@@ -3397,7 +3484,7 @@ class AlfredAPI(RedisUserMixin):
             code:  See the API code documentation for details.
             load:  [mass，x_centroid，y_centroid，z_centroid，Fx_offset，Fy_offset，Fz_offset，Mx_offset，My_offset，Mz_ffset]
         """
-        return self._arm.ft_sensor_iden_load()
+        return self._execute_func("ft_sensor_iden_load")
 
     def ft_sensor_cali_load(self, iden_result_list):
         """
@@ -3409,7 +3496,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.ft_sensor_cali_load(iden_result_list)
+        return self._execute_func("ft_sensor_cali_load", iden_result_list)
 
     def ft_sensor_enable(self, on_off):
         """
@@ -3421,7 +3508,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.ft_sensor_enable(on_off)
+        return self._execute_func("ft_sensor_enable", on_off)
 
     def ft_sensor_app_set(self, app_code):
         """
@@ -3434,7 +3521,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             status:
         """
-        return self._arm.ft_sensor_app_set(app_code)
+        return self._execute_func("ft_sensor_app_set", app_code)
 
     def ft_sensor_app_get(self):
         """
@@ -3448,7 +3535,7 @@ class AlfredAPI(RedisUserMixin):
                     1: impedance control mode
                     2: force control mode
         """
-        return self._arm.ft_sensor_app_get()
+        return self._execute_func("ft_sensor_app_get")
 
     def get_exe_ft(self):
         """
@@ -3460,7 +3547,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             exe_ft: only when code is 0, the returned result is correct.
         """
-        return self._arm.get_exe_ft()
+        return self._execute_func("get_exe_ft")
 
     def iden_tcp_load(self):
         """
@@ -3472,7 +3559,7 @@ class AlfredAPI(RedisUserMixin):
             code:  See the API code documentation for details.
             load:  [mass，x_centroid，y_centroid，z_centroid]
         """
-        return self._arm.iden_tcp_load()
+        return self._execute_func("iden_tcp_load")
 
     def get_linear_track_registers(self, **kwargs):
         """
@@ -3493,7 +3580,7 @@ class AlfredAPI(RedisUserMixin):
                     'sco': [0, 0],
                 }
         """
-        return self._arm.get_linear_track_registers(**kwargs)
+        return self._execute_func("get_linear_track_registers", **kwargs)
 
     def get_linear_track_pos(self):
         """
@@ -3505,7 +3592,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             position: position
         """
-        return self._arm.get_linear_track_pos()
+        return self._execute_func("get_linear_track_pos")
 
     def get_linear_track_status(self):
         """
@@ -3520,7 +3607,7 @@ class AlfredAPI(RedisUserMixin):
                 status & 0x01: in motion
                 status & 0x02: has stop
         """
-        return self._arm.get_linear_track_status()
+        return self._execute_func("get_linear_track_status")
 
     def get_linear_track_error(self):
         """
@@ -3532,7 +3619,7 @@ class AlfredAPI(RedisUserMixin):
             code:  See the API code documentation for details.
             error: error code
         """
-        return self._arm.get_linear_track_error()
+        return self._execute_func("get_linear_track_error")
 
     def get_linear_track_is_enabled(self):
         """
@@ -3546,7 +3633,7 @@ class AlfredAPI(RedisUserMixin):
                 0: linear track is not enabled
                 1: linear track is enabled
         """
-        return self._arm.get_linear_track_is_enabled()
+        return self._execute_func("get_linear_track_is_enabled")
 
     def get_linear_track_on_zero(self):
         """
@@ -3560,7 +3647,7 @@ class AlfredAPI(RedisUserMixin):
                 0: linear track is not on zero
                 1: linear track is on zero
         """
-        return self._arm.get_linear_track_on_zero()
+        return self._execute_func("get_linear_track_on_zero")
 
     def get_linear_track_sci(self):
         """
@@ -3571,7 +3658,7 @@ class AlfredAPI(RedisUserMixin):
         :return: tuple((code, sci1)) only when code is 0, the returned result is correct.
             code: See the API code documentation for details.
         """
-        return self._arm.get_linear_track_sci()
+        return self._execute_func("get_linear_track_sci")
 
     def get_linear_track_sco(self):
         """
@@ -3583,7 +3670,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             sco: [sco0, sco1]
         """
-        return self._arm.get_linear_track_sco()
+        return self._execute_func("get_linear_track_sco")
 
     def clean_linear_track_error(self):
         """
@@ -3594,7 +3681,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.clean_linear_track_error()
+        return self._execute_func("clean_linear_track_error")
 
     def set_linear_track_enable(self, enable):
         """
@@ -3606,7 +3693,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_linear_track_enable(enable)
+        return self._execute_func("set_linear_track_enable", enable)
 
     def set_linear_track_speed(self, speed):
         """
@@ -3618,7 +3705,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_linear_track_speed(speed)
+        return self._execute_func("set_linear_track_speed", speed)
 
     def set_linear_track_back_origin(self, wait=True, **kwargs):
         """
@@ -3634,7 +3721,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_linear_track_back_origin(wait=wait, **kwargs)
+        return self._execute_func(
+            "set_linear_track_back_origin", wait=wait, **kwargs
+        )
 
     def set_linear_track_pos(
         self, pos, speed=None, wait=True, timeout=100, **kwargs
@@ -3654,8 +3743,13 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_linear_track_pos(
-            pos, speed=speed, wait=wait, timeout=timeout, **kwargs
+        return self._execute_func(
+            "set_linear_track_pos",
+            pos,
+            speed=speed,
+            wait=wait,
+            timeout=timeout,
+            **kwargs,
         )
 
     def set_linear_track_stop(self):
@@ -3667,47 +3761,4 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._arm.set_linear_track_stop()
-
-    def delete_blockly_app(self, name):
-        """
-        Delete blockly app
-
-        :param name: blockly app name
-
-        :return: code
-            code: See the API code documentation for details.
-        """
-        return self._studio.delete_blockly_app(name)
-
-    def delete_trajectory(self, name):
-        """
-        Delete trajectory
-
-        :param name: trajectory name
-
-        :return: code
-            code: See the API code documentation for details.
-        """
-        return self._studio.delete_trajectory(name)
-
-    def get_initial_point(self):
-        """
-        Get the initial point from studio
-
-        :return: tuple((code, point)), only when code is 0, the returned result is correct.
-            code: See the API code documentation for details.
-            point: initial point, [J1, J2, ..., J7]
-        """
-        return self._studio.get_initial_point()
-
-    def set_initial_point(self, point):
-        """
-        Set the initial point
-
-        :param point: initial point, [J1, J2, ..., J7]
-
-        :return: code
-            code: See the API code documentation for details.
-        """
-        return self._studio.set_initial_point(point)
+        return self._execute_func("set_linear_track_stop")
