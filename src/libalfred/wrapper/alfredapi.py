@@ -116,35 +116,35 @@ class AlfredAPI(RedisUserMixin):
         """
         Connection status
         """
-        return self._arm.connected
+        return self._get_prop("connected")
 
     @property
     def default_is_radian(self):
         """
         The default unit is radians or not
         """
-        return self._arm.default_is_radian
+        return self._get_prop("default_is_radian")
 
     @property
     def version(self):
         """
         xArm version
         """
-        return self._arm.version
+        return self._get_prop("version")
 
     @property
     def sn(self):
         """
         xArm sn
         """
-        return self._arm.sn
+        return self._get_prop("sn")
 
     @property
     def control_box_sn(self):
         """
         Control box sn
         """
-        return self._arm.control_box_sn
+        return self._get_prop("control_box_sn")
 
     @property
     def position(self):
@@ -155,7 +155,7 @@ class AlfredAPI(RedisUserMixin):
 
         return: [x(mm), y(mm), z(mm), roll(° or rad), pitch(° or rad), yaw(° or rad)]
         """
-        return self._arm.position
+        return self._get_prop("position")
 
     @property
     def position_aa(self):
@@ -166,7 +166,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [x(mm), y(mm), z(mm), rx(° or rad), ry(° or rad), rz(° or rad)]
         """
-        return self._arm.position_aa
+        return self._get_prop("position_aa")
 
     @property
     def last_used_position(self):
@@ -179,7 +179,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [x(mm), y(mm), z(mm), roll(° or rad), pitch(° or rad), yaw(° or rad)]
         """
-        return self._arm.last_used_position
+        return self._get_prop("last_used_position")
 
     @property
     def tcp_jerk(self):
@@ -188,7 +188,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: jerk (mm/s^3)
         """
-        return self._arm.tcp_jerk
+        return self._get_prop("tcp_jerk")
 
     @property
     def tcp_speed_limit(self):
@@ -197,7 +197,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [min_tcp_speed(mm/s), max_tcp_speed(mm/s)]
         """
-        return self._arm.tcp_speed_limit
+        return self._get_prop("tcp_speed_limit")
 
     @property
     def tcp_acc_limit(self):
@@ -206,7 +206,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [min_tcp_acc(mm/s^2), max_tcp_acc(mm/s^2)]
         """
-        return self._arm.tcp_acc_limit
+        return self._get_prop("tcp_acc_limit")
 
     @property
     def last_used_tcp_speed(self):
@@ -215,7 +215,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: speed (mm/s)
         """
-        return self._arm.last_used_tcp_speed
+        return self._get_prop("last_used_tcp_speed")
 
     @property
     def last_used_tcp_acc(self):
@@ -224,7 +224,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: acceleration (mm/s^2)
         """
-        return self._arm.last_used_tcp_acc
+        return self._get_prop("last_used_tcp_acc")
 
     @property
     def angles(self):
@@ -235,7 +235,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [angle1(° or rad), angle2(° or rad), ..., anglen7(° or rad)]
         """
-        return self._arm.angles
+        return self._get_prop("angles")
 
     @property
     def joint_jerk(self):
@@ -246,7 +246,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: jerk (°/s^3 or rad/s^3)
         """
-        return self._arm.joint_jerk
+        return self._get_prop("joint_jerk")
 
     @property
     def joint_speed_limit(self):
@@ -257,7 +257,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [min_joint_speed(°/s or rad/s), max_joint_speed(°/s or rad/s)]
         """
-        return self._arm.joint_speed_limit
+        return self._get_prop("joint_speed_limit")
 
     @property
     def joint_acc_limit(self):
@@ -268,7 +268,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [min_joint_acc(°/s^2 or rad/s^2), max_joint_acc(°/s^2 or rad/s^2)]
         """
-        return self._arm.joint_acc_limit
+        return self._get_prop("joint_acc_limit")
 
     @property
     def last_used_angles(self):
@@ -281,7 +281,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [angle1(° or rad), angle2(° or rad), ..., angle7(° or rad)]
         """
-        return self._arm.last_used_angles
+        return self._get_prop("last_used_angles")
 
     @property
     def last_used_joint_speed(self):
@@ -292,7 +292,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: speed (°/s or rad/s)
         """
-        return self._arm.last_used_joint_speed
+        return self._get_prop("last_used_joint_speed")
 
     @property
     def last_used_joint_acc(self):
@@ -303,7 +303,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: acceleration (°/s^2 or rad/s^2)
         """
-        return self._arm.last_used_joint_acc
+        return self._get_prop("last_used_joint_acc")
 
     @property
     def tcp_offset(self):
@@ -314,7 +314,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [x_offset(mm), y_offset(mm), z_offset(mm), roll_offset(° or rad), pitch_offset(° or rad), yaw_offset(° or rad)]
         """
-        return self._arm.position_offset
+        return self._get_prop("position_offset")
 
     @property
     def world_offset(self):
@@ -326,7 +326,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [x_offset(mm), y_offset(mm), z_offset(mm), roll_offset(° or rad), pitch_offset(° or rad), yaw_offset(° or rad)]
         """
-        return self._arm.world_offset
+        return self._get_prop("world_offset")
 
     @property
     def state(self):
@@ -339,7 +339,7 @@ class AlfredAPI(RedisUserMixin):
             3: suspended
             4: stopping
         """
-        return self._arm.state
+        return self._get_prop("state")
 
     @property
     def mode(self):
@@ -352,14 +352,14 @@ class AlfredAPI(RedisUserMixin):
             2: joint teaching mode
             3: cartesian teaching mode (invalid)
         """
-        return self._arm.mode
+        return self._get_prop("mode")
 
     @property
     def is_simulation_robot(self):
         """
         Is simulation robot not not
         """
-        return self._arm.is_simulation_robot
+        return self._get_prop("is_simulation_robot")
 
     @property
     def joints_torque(self):
@@ -368,7 +368,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [joint-1, ....]
         """
-        return self._arm.joints_torque
+        return self._get_prop("joints_torque")
 
     @property
     def tcp_load(self):
@@ -378,7 +378,7 @@ class AlfredAPI(RedisUserMixin):
         :return: [weight, center of gravity]
             such as: [weight(kg), [x(mm), y(mm), z(mm)]]
         """
-        return self._arm.tcp_load
+        return self._get_prop("tcp_load")
 
     @property
     def collision_sensitivity(self):
@@ -387,7 +387,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: 0~5
         """
-        return self._arm.collision_sensitivity
+        return self._get_prop("collision_sensitivity")
 
     @property
     def teach_sensitivity(self):
@@ -396,7 +396,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: 1~5
         """
-        return self._arm.teach_sensitivity
+        return self._get_prop("teach_sensitivity")
 
     @property
     def motor_brake_states(self):
@@ -410,7 +410,7 @@ class AlfredAPI(RedisUserMixin):
                 0: enable
                 1: disable
         """
-        return self._arm.motor_brake_states
+        return self._get_prop("motor_brake_states")
 
     @property
     def motor_enable_states(self):
@@ -424,7 +424,7 @@ class AlfredAPI(RedisUserMixin):
                 0: disable
                 1: enable
         """
-        return self._arm.motor_enable_states
+        return self._get_prop("motor_enable_states")
 
     @property
     def temperatures(self):
@@ -433,7 +433,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [motor-1-temperature, ..., motor-7-temperature]
         """
-        return self._arm.temperatures
+        return self._get_prop("temperatures")
 
     @property
     def has_err_warn(self):
@@ -442,70 +442,70 @@ class AlfredAPI(RedisUserMixin):
 
         :return: True/False
         """
-        return self._arm.has_err_warn
+        return self._get_prop("has_err_warn")
 
     @property
     def has_error(self):
         """
         Controller have an error or not
         """
-        return self._arm.has_error
+        return self._get_prop("has_error")
 
     @property
     def has_warn(self):
         """
         Controller have an warnning or not
         """
-        return self._arm.has_warn
+        return self._get_prop("has_warn")
 
     @property
     def error_code(self):
         """
         Controller error code. See Chapter 7 of the xArm User Manual for details.
         """
-        return self._arm.error_code
+        return self._get_prop("error_code")
 
     @property
     def warn_code(self):
         """
         Controller warn code. See Chapter 7 of the xArm User Manual for details.
         """
-        return self._arm.warn_code
+        return self._get_prop("warn_code")
 
     @property
     def cmd_num(self):
         """
         Number of command caches in the controller
         """
-        return self._arm.cmd_num
+        return self._get_prop("cmd_num")
 
     @property
     def device_type(self):
         """
         Device type, only available in socket way and  enable_report is True and report_type is 'rich'
         """
-        return self._arm.device_type
+        return self._get_prop("device_type")
 
     @property
     def axis(self):
         """
         Axis number, only available in socket way and enable_report is True and report_type is 'rich'
         """
-        return self._arm.axis
+        return self._get_prop("axis")
 
     @property
     def master_id(self):
         """
         Master id, only available in socket way and enable_report is True and report_type is 'rich'
         """
-        return self._arm.master_id
+        return self._get_prop("master_id")
 
     @property
     def slave_id(self):
         """
         Slave id, only available in socket way and enable_report is True and report_type is 'rich'
         """
-        return self._arm.slave_id
+        return self._get_prop("slave_id")
 
     @property
     def gravity_direction(self):
@@ -513,7 +513,7 @@ class AlfredAPI(RedisUserMixin):
         gravity direction, only available in socket way and enable_report is True and report_type is 'rich'
         :return:
         """
-        return self._arm.gravity_direction
+        return self._get_prop("gravity_direction")
 
     @property
     def servo_codes(self):
@@ -526,7 +526,7 @@ class AlfredAPI(RedisUserMixin):
             [tool-gpio-status, tool-gpio-code]
         ]
         """
-        return self._arm.servo_codes
+        return self._get_prop("servo_codes")
 
     @property
     def voltages(self):
@@ -535,7 +535,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [servo-1-voltage, ..., servo-7-voltage]
         """
-        return self._arm.voltages
+        return self._get_prop("voltages")
 
     @property
     def currents(self):
@@ -544,7 +544,7 @@ class AlfredAPI(RedisUserMixin):
 
         :return: [servo-1-current, ..., servo-7-current]
         """
-        return self._arm.currents
+        return self._get_prop("currents")
 
     @property
     def cgpio_states(self):
@@ -574,7 +574,7 @@ class AlfredAPI(RedisUserMixin):
             states[10]: digital input functional info, [digital-0-input-functional-mode, ... digital-7-input-functional-mode]
             states[11]: digital output functional info, [digital-0-output-functional-mode, ... digital-7-output-functional-mode]
         """
-        return self._arm.cgpio_states
+        return self._get_prop("cgpio_states")
 
     @property
     def self_collision_params(self):
@@ -586,15 +586,15 @@ class AlfredAPI(RedisUserMixin):
             params[1]: self collision tool type
             params[2]: self collision model params
         """
-        return self._arm.self_collision_params
+        return self._get_prop("self_collision_params")
 
     @property
     def ft_ext_force(self):
-        return self._arm.ft_ext_force
+        return self._get_prop("ft_ext_force")
 
     @property
     def ft_raw_force(self):
-        return self._arm.ft_raw_force
+        return self._get_prop("ft_raw_force")
 
     def connect(
         self, port=None, baudrate=None, timeout=None, axis=None, **kwargs
@@ -2887,7 +2887,7 @@ class AlfredAPI(RedisUserMixin):
             }
             Note: -1 means never updated
         """
-        return self._arm.robotiq_status
+        return self._get_prop("robotiq_status")
 
     def set_bio_gripper_enable(self, enable=True, wait=True, timeout=3):
         """
