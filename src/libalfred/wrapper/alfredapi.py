@@ -71,23 +71,23 @@ class AlfredAPI(RedisUserMixin):
             ret_val = value
             self._arm.__setattr__("last_func_ret", ret_val)
 
-    def _get_prop(self, prop_name: str, timeout=0.01):
+    def _get_prop(self, prop_name: str, ret_timeout=0.01):
         self._arm.__setattr__(prop_name, "dummy_val")
 
         self.rc.publish(self.PROP_PUBSUB_CHANNEL, f"get:{prop_name}")
 
-        # wait for value to be updated, timeout after timeout seconds
+        # wait for value to be updated, timeout after ret_timeout seconds
         begin = time.perf_counter()
         while self._arm.__getattribute__(prop_name) == "dummy_val":
             now = time.perf_counter()
-            if now - begin > timeout:
+            if now - begin > ret_timeout:
                 raise TimeoutError
 
             time.sleep(0.0005)
 
         return self._arm.__getattribute__(prop_name)
 
-    def _execute_func(self, func_name, *args, timeout=1_000, **kwargs):
+    def _execute_func(self, func_name, *args, ret_timeout=120, **kwargs):
         func_dict = {"name": func_name, "args": args, "kwargs": kwargs}
 
         self._arm.__setattr__("last_func_ret", "dummy_val")
@@ -96,11 +96,11 @@ class AlfredAPI(RedisUserMixin):
             self.FUNC_PUBSUB_CHANNEL, f"exec:{json.dumps(func_dict)}"
         )
 
-        # wait for value to be updated, timeout after timeout seconds
+        # wait for value to be updated, timeout after ret_timeout seconds
         begin = time.perf_counter()
         while self._arm.__getattribute__("last_func_ret") == "dummy_val":
             now = time.perf_counter()
-            if now - begin > timeout:
+            if now - begin > ret_timeout:
                 raise TimeoutError
 
             time.sleep(0.0005)
