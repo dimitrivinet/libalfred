@@ -21,7 +21,10 @@ class AlfredAPI(RedisUserMixin):
     pub_channel: str
 
     def __init__(
-        self, redis_host: str, redis_port: int, redis_password: str = None,
+        self,
+        redis_host: str = "redis",
+        redis_port: int = 6379,
+        redis_password: str = None,
     ):
         self._arm = FakeArm()
 
@@ -39,9 +42,11 @@ class AlfredAPI(RedisUserMixin):
     def prop_message_handler(self, message):
         """Handle messages for getting and setting properties."""
 
-        data = message["data"]
+        data = message["data"].decode("utf-8")
+        print(data)
 
         kw, value = data.split(":")
+        print(kw, value)
 
         if kw == "get" or kw == "set":
             return
@@ -59,6 +64,7 @@ class AlfredAPI(RedisUserMixin):
         begin = time.perf_counter()
         while self._arm.__getattribute__(prop_name) == "dummy_val":
             now = time.perf_counter()
+            print(now - begin)
             if now - begin > timeout:
                 raise exceptions.GetPropTimeoutException()
 
