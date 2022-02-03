@@ -48,7 +48,7 @@ class AlfredAPI(RedisUserMixin):
 
         data = message["data"].decode("utf-8")
 
-        kw, value = data.split(":")
+        kw, value = data.split(":", 1)
 
         if kw == "get" or kw == "set":
             return
@@ -62,7 +62,7 @@ class AlfredAPI(RedisUserMixin):
 
         data = message["data"].decode("utf-8")
 
-        kw, value = data.split(":")
+        kw, value = data.split(":", 1)
 
         if kw == "exec":
             return
