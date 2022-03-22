@@ -17,7 +17,7 @@ BUFFER_SIZE=1
 
 class StreamCamThread(threading.Thread,RedisUserMixin):
     """Thread to stream with the realsense"""
-    def __init__(self, camera_feed: str, buffer_size: int=BUFFER_SIZE, daemon: bool=True, redis_host: str = "redis", redis_port: int = 6379, redis_password: str = None,) -> None:
+    def __init__(self, camera_feed: str=CAM, buffer_size: int=BUFFER_SIZE, daemon: bool=True, redis_host: str = "redis", redis_port: int = 6379, redis_password: str = None,) -> None:
         super().__init__()
 
         self.redis_host = redis_host
