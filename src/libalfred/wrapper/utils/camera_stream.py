@@ -24,18 +24,21 @@ class StreamCamThread(threading.Thread,RedisUserMixin):
         self.redis_port = redis_port
         self.redis_password = redis_password
 
-        self.connect_redis()
-        self.pubsub.subscribe(camera_feed)
-
+        self.camera_feed=camera_feed
         self.buffer=deque(maxlen=buffer_size)
         self.frame_ready=False
+        self._stop=threading.Event()
     
     def run(self):
+        self.connect_redis()
+        self.pubsub.subscribe(self.camera_feed)
         while True:
             message=self.pubsub.get_message()
             if not message:
                 time.sleep(0.001)
                 continue
+            if self._stop.is_set():
+                break
             frame = pickle.loads(message["data"])
             self.buffer.append(frame)
             self.frame_ready=True
@@ -48,6 +51,9 @@ class StreamCamThread(threading.Thread,RedisUserMixin):
             frame=self.buffer[-1]
             self.frame_ready=False
         return frame
+    
+    def stop(self):
+        self._stop.set()
 
 
 
