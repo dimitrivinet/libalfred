@@ -39,6 +39,9 @@ class AlfredAPI(RedisUserMixin):
             }
         )
         self.pubsub_thread = self.pubsub.run_in_thread(sleep_time=0.001)
+    
+    def stop(self):
+        self.pubsub_thread.stop()
 
     def prop_message_handler(self, message):
         """Handle messages for getting and setting properties."""
