@@ -4,6 +4,7 @@ import threading
 import time
 from collections import deque
 
+import numpy as np
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 
 logger = logging.getLogger(__name__)
