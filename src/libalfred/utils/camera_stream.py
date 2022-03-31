@@ -4,7 +4,6 @@ import threading
 import time
 from collections import deque
 
-import numpy as np
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 
 logger = logging.getLogger(__name__)
@@ -34,6 +33,8 @@ class StreamCamThread(threading.Thread, RedisUserMixin):
         self.buffer: deque = deque(maxlen=buffer_size)
         self.frame_ready = False
         self._stop = threading.Event()
+
+        self.count = -1
 
     def run(self):
         self.connect_redis()
