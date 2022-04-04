@@ -4,6 +4,7 @@ import threading
 import time
 from collections import deque
 
+import numpy as np
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 
 logger = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class StreamCamThread(threading.Thread, RedisUserMixin):
 
         self.camera_feed = camera_feed
         self.buffer: deque = deque(maxlen=buffer_size)
+        self._frame_size = (0, 0)
         self.frame_ready = False
         self._stop = threading.Event()
 
@@ -46,9 +48,18 @@ class StreamCamThread(threading.Thread, RedisUserMixin):
                 continue
             if self._stop.is_set():
                 break
-            frame = pickle.loads(message["data"])
+
+            frame: np.ndarray = pickle.loads(message["data"])
+            self._frame_size = frame.shape
             self.buffer.append(frame)
             self.frame_ready = True
+
+    @property
+    def frame_size(self):
+        """Get frame size as tuple."""
+
+        with _lock:
+            return self._frame_size
 
     def get_frame(self):
         """Return the last streamed frame"""
