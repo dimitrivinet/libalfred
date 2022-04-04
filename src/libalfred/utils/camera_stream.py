@@ -3,6 +3,7 @@ import pickle
 import threading
 import time
 from collections import deque
+from typing import Optional, Tuple
 
 import numpy as np
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
@@ -55,14 +56,15 @@ class StreamCamThread(threading.Thread, RedisUserMixin):
             self.frame_ready = True
 
     @property
-    def frame_size(self):
+    def frame_size(self) -> Tuple[int, int]:
         """Get frame size as tuple."""
 
         with _lock:
             return self._frame_size
 
-    def get_frame(self):
+    def get_frame(self) -> Optional[np.ndarray]:
         """Return the last streamed frame"""
+
         with _lock:
             if not self.frame_ready:
                 return None
@@ -71,6 +73,8 @@ class StreamCamThread(threading.Thread, RedisUserMixin):
         return frame
 
     def stop(self):
+        """Stop cam thread."""
+
         self._stop.set()
 
     def __iter__(self):
