@@ -39,7 +39,7 @@ class AlfredAPI(RedisUserMixin):
             }
         )
         self.pubsub_thread = self.pubsub.run_in_thread(sleep_time=0.001)
-    
+
     def stop(self):
         self.pubsub_thread.stop()
 
@@ -92,9 +92,7 @@ class AlfredAPI(RedisUserMixin):
 
         self._arm.__setattr__("last_func_ret", "dummy_val")
 
-        self.rc.publish(
-            self.FUNC_PUBSUB_CHANNEL, f"exec:{json.dumps(func_dict)}"
-        )
+        self.rc.publish(self.FUNC_PUBSUB_CHANNEL, f"exec:{json.dumps(func_dict)}")
 
         # wait for value to be updated, timeout after ret_timeout seconds
         begin = time.perf_counter()
@@ -1302,9 +1300,7 @@ class AlfredAPI(RedisUserMixin):
             "load_trajectory", filename, wait=wait, timeout=timeout
         )
 
-    def playback_trajectory(
-        self, times=1, filename=None, wait=True, double_speed=1
-    ):
+    def playback_trajectory(self, times=1, filename=None, wait=True, double_speed=1):
         """
         Playback trajectory
 
@@ -1502,9 +1498,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._execute_func(
-            "set_world_offset", offset, is_radian=is_radian
-        )
+        return self._execute_func("set_world_offset", offset, is_radian=is_radian)
 
     def get_is_moving(self):
         """
@@ -1607,9 +1601,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._execute_func(
-            "motion_enable", servo_id=servo_id, enable=enable
-        )
+        return self._execute_func("motion_enable", servo_id=servo_id, enable=enable)
 
     def reset(
         self,
@@ -1849,9 +1841,7 @@ class AlfredAPI(RedisUserMixin):
         """
         return self._execute_func("save_conf")
 
-    def get_inverse_kinematics(
-        self, pose, input_is_radian=None, return_is_radian=None
-    ):
+    def get_inverse_kinematics(self, pose, input_is_radian=None, return_is_radian=None):
         """
         Get inverse kinematics
 
@@ -2299,9 +2289,7 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._execute_func(
-            "register_state_changed_callback", callback=callback
-        )
+        return self._execute_func("register_state_changed_callback", callback=callback)
 
     def register_mode_changed_callback(self, callback=None):
         """
@@ -2314,9 +2302,7 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._execute_func(
-            "register_mode_changed_callback", callback=callback
-        )
+        return self._execute_func("register_mode_changed_callback", callback=callback)
 
     def register_mtable_mtbrake_changed_callback(self, callback=None):
         """
@@ -2361,9 +2347,7 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._execute_func(
-            "register_cmdnum_changed_callback", callback=callback
-        )
+        return self._execute_func("register_cmdnum_changed_callback", callback=callback)
 
     def register_temperature_changed_callback(self, callback=None):
         """
@@ -2391,9 +2375,7 @@ class AlfredAPI(RedisUserMixin):
             }
         :return: True/False
         """
-        return self._execute_func(
-            "register_count_changed_callback", callback=callback
-        )
+        return self._execute_func("register_count_changed_callback", callback=callback)
 
     def register_iden_progress_changed_callback(self, callback=None):
         """
@@ -2462,9 +2444,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._execute_func(
-            "release_mtable_mtbrake_changed_callback", callback
-        )
+        return self._execute_func("release_mtable_mtbrake_changed_callback", callback)
 
     def release_error_warn_changed_callback(self, callback=None):
         """
@@ -2473,9 +2453,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._execute_func(
-            "release_error_warn_changed_callback", callback
-        )
+        return self._execute_func("release_error_warn_changed_callback", callback)
 
     def release_cmdnum_changed_callback(self, callback=None):
         """
@@ -2504,9 +2482,7 @@ class AlfredAPI(RedisUserMixin):
         :param callback:
         :return: True/False
         """
-        return self._execute_func(
-            "release_count_changed_callback", callback=callback
-        )
+        return self._execute_func("release_count_changed_callback", callback=callback)
 
     def release_iden_progress_changed_callback(self, callback=None):
         """
@@ -2609,9 +2585,7 @@ class AlfredAPI(RedisUserMixin):
         """
         return self._execute_func("set_counter_increase", val)
 
-    def set_tgpio_digital_with_xyz(
-        self, ionum, value, xyz, fault_tolerance_radius
-    ):
+    def set_tgpio_digital_with_xyz(self, ionum, value, xyz, fault_tolerance_radius):
         """
         Set the digital value of the specified Tool GPIO when the robot has reached the specified xyz position
 
@@ -2630,9 +2604,7 @@ class AlfredAPI(RedisUserMixin):
             fault_tolerance_radius,
         )
 
-    def set_cgpio_digital_with_xyz(
-        self, ionum, value, xyz, fault_tolerance_radius
-    ):
+    def set_cgpio_digital_with_xyz(self, ionum, value, xyz, fault_tolerance_radius):
         """
         Set the digital value of the specified Controller GPIO when the robot has reached the specified xyz position
 
@@ -2651,9 +2623,7 @@ class AlfredAPI(RedisUserMixin):
             fault_tolerance_radius,
         )
 
-    def set_cgpio_analog_with_xyz(
-        self, ionum, value, xyz, fault_tolerance_radius
-    ):
+    def set_cgpio_analog_with_xyz(self, ionum, value, xyz, fault_tolerance_radius):
         """
         Set the analog value of the specified Controller GPIO when the robot has reached the specified xyz position
 
@@ -2874,9 +2844,7 @@ class AlfredAPI(RedisUserMixin):
             code: See the API code documentation for details.
             robotiq_response: See the robotiq documentation
         """
-        return self._execute_func(
-            "robotiq_set_activate", wait=wait, timeout=timeout
-        )
+        return self._execute_func("robotiq_set_activate", wait=wait, timeout=timeout)
 
     def robotiq_set_position(
         self, pos, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs
@@ -2904,9 +2872,7 @@ class AlfredAPI(RedisUserMixin):
             **kwargs,
         )
 
-    def robotiq_open(
-        self, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs
-    ):
+    def robotiq_open(self, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs):
         """
         Open the robotiq gripper
 
@@ -2928,9 +2894,7 @@ class AlfredAPI(RedisUserMixin):
             **kwargs,
         )
 
-    def robotiq_close(
-        self, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs
-    ):
+    def robotiq_close(self, speed=0xFF, force=0xFF, wait=True, timeout=5, **kwargs):
         """
         Close the robotiq gripper
 
@@ -3356,9 +3320,7 @@ class AlfredAPI(RedisUserMixin):
             return_is_radian=return_is_radian,
         )
 
-    def calibrate_user_coordinate_offset(
-        self, rpy_ub, pos_b_uorg, is_radian=None
-    ):
+    def calibrate_user_coordinate_offset(self, rpy_ub, pos_b_uorg, is_radian=None):
         """
         An additional teaching point determines the position offset of the user coordinate system.
         Note:
@@ -3445,9 +3407,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._execute_func(
-            "config_force_control", coord, c_axis, f_ref, limits
-        )
+        return self._execute_func("config_force_control", coord, c_axis, f_ref, limits)
 
     def set_force_control_pid(self, kp, ki, kd, xe_limit):
         """
@@ -3462,9 +3422,7 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._execute_func(
-            "set_force_control_pid", kp, ki, kd, xe_limit
-        )
+        return self._execute_func("set_force_control_pid", kp, ki, kd, xe_limit)
 
     def ft_sensor_set_zero(self):
         """
@@ -3724,13 +3682,9 @@ class AlfredAPI(RedisUserMixin):
         :return: code
             code: See the API code documentation for details.
         """
-        return self._execute_func(
-            "set_linear_track_back_origin", wait=wait, **kwargs
-        )
+        return self._execute_func("set_linear_track_back_origin", wait=wait, **kwargs)
 
-    def set_linear_track_pos(
-        self, pos, speed=None, wait=True, timeout=100, **kwargs
-    ):
+    def set_linear_track_pos(self, pos, speed=None, wait=True, timeout=100, **kwargs):
         """
         Set the position of the linear track
         Note:

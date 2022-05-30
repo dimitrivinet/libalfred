@@ -6,6 +6,7 @@ from collections import deque
 from typing import Optional, Tuple
 
 import numpy as np
+
 from libalfred.wrapper.mixins.redis_user import RedisUserMixin
 
 logger = logging.getLogger(__name__)
