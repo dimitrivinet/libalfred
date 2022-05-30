@@ -1,9 +1,10 @@
 import logging
 
 
-def config_logger(logger_name: str):
+def config_logger(logger_name: str, propagate: bool = True):
     # create logger
     logger = logging.getLogger(logger_name)
+    logger.propagate = propagate
     logger.setLevel(logging.DEBUG)
 
     # create console handler and set level to debug
