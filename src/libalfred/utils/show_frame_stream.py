@@ -11,7 +11,7 @@ _lock = threading.Lock()
 class ShowThread(threading.Thread):
     """Thread to show the camera stream"""
 
-    def __init__(self, is_aruco: bool = False, mtx: Any = None, dist: Any = None, rvec: Any = None, tvec: Any = None, cornes: np.array = None, ids: np.array = None) -> None:
+    def __init__(self, is_aruco: bool = False, mtx: Any = None, dist: Any = None, rvec: Any = None, tvec: Any = None, corners: np.array = None, ids: np.array = None) -> None:
         super().__init__()
         self.frame = None
         self._stop = threading.Event()
@@ -21,7 +21,7 @@ class ShowThread(threading.Thread):
             self.dist = dist
             self.rvec = rvec
             self.tvec = tvec
-            self.corners = cornes
+            self.corners = corners
             self.ids = ids
 
     def run(self):
